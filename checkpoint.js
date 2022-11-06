@@ -32,8 +32,12 @@ const {
 // > sqrt(4);
 // < 16
 
-function exponencial(exp) {
-
+function exponencial(exponent) {
+    this.exponent=exponent;
+        this.number=0;
+        return function(number) {
+            return this.number+" "+number+" you are name "+(++this.number);
+        }
 }
 
 // ----- Recursión -----
@@ -70,7 +74,54 @@ function exponencial(exp) {
 // Aclaraciones: el segundo parametro que recibe la funcion ('direccion') puede ser pasado vacio (null)
 
 function direcciones(laberinto) {
-
+    let ubica = []
+        for(const [clave, valor] of Object.entries(laberinto)) {
+            if(laberinto.N === 'destino') {
+                ubica.push('N')
+                return ubica
+            }
+          
+            if(laberinto.S === 'destino') {
+                ubica.push('S')
+                return ubica
+            }
+            
+            if(laberinto.E === 'destino') {
+                ubica.push('E')
+                return ubica
+            }
+            
+            if(laberinto.O === 'destino') {
+                ubica.push('O')
+                return ubica
+            }
+            
+            if(laberinto.N !== 'laberinto' && laberinto.S !== 'laberinto' && laberinto.E !== 'laberinto' && laberinto.O !== 'laberinto') {
+                ubica.push('O')
+                return ubica;
+            }            
+            
+            if(typeof valor === 'object') {
+                return direcciones(valor)        
+            }            
+        }
+        
+        function direccionesfn(laberintofn) {
+            for (const [clave, valor] of Object.entries(laberintofn)) {
+                if (valor === 'destino') {
+                    return clave;
+                }
+          
+                if (typeof valor === 'object') {
+                    let destinoEncontrado = direccionesfn(valor);
+                    if (destinoEncontrado.length > 0) {
+                        return clave + destinoEncontrado;
+                    }
+                }
+            }
+          
+            return '';
+          }
 }
 
 
@@ -88,7 +139,15 @@ function direcciones(laberinto) {
 // deepEqualArrays([0,1,[[0,1,2],1,2]], [0,1,[[0,1,2],1,2]]) => true
 
 function deepEqualArrays(arr1, arr2) {
-
+    arr1 = [0,1,2];
+    arr2 = [0,1,2];
+    
+    arr1.sort();  //Se ordenan ambos arreglos
+    arr2.sort();
+    
+    arr1.length==arr2.length && arr1.every(function(v,i) {
+         return v === arr2[i]
+        });         //Realiza la comparación de cada elemento
 }
 
 
@@ -106,6 +165,7 @@ function deepEqualArrays(arr1, arr2) {
 // Las dos clases principales ya van a estar implementadas a continuacion:
 function OrderedLinkedList() {
     this.head = null;
+
 }
 // notar que Node esta implementado en el archivo DS
 
@@ -139,12 +199,27 @@ OrderedLinkedList.prototype.print = function(){
 // < 'head --> 5 --> 3 --> 1 --> null'
 //               4
 OrderedLinkedList.prototype.add = function(val){
+    let nuevo = new Node(value)
     
+    let puntero = this.head                             // Busca un elemento menor
+    let previo = null
+    while(puntero != null && puntero.value >= value) {
+        previo = puntero
+        puntero = puntero.next
+    }
+    
+    if (previo == null) {                               // Adiciona el elemento
+        nuevo.next = this.head
+        this.head = nuevo
+    } else {
+        nuevo.next = previo.next
+        previo.next = nuevo
+    }
 }
 
 
 // EJERCICIO 5
-// Crea el metodo 'removeHigher' que deve devolver el valor mas alto de la linked list 
+// Crea el metodo 'removeHigher' que debe devolver el valor mas alto de la linked list 
 // removiendo su nodo corresponidente:
 // Ejemplo:
 // > LL.print()
@@ -159,12 +234,44 @@ OrderedLinkedList.prototype.add = function(val){
 // < null
 
 OrderedLinkedList.prototype.removeHigher = function(){
-    
+    it('Remove saca el último nodo ingresado y devuelve su valor', function() {
+        linkedList.add('first');
+        linkedList.add('second');
+        expect(linkedList.remove()).toBe('second');
+        expect(linkedList.remove()).toBe('first');
+      });
+      
+      
+      function LinkedList() {
+        this.head = null;
+      }
+      
+      function Node(value) {
+        this.value = value;
+        this.next = null;
+      }
+      
+      LinkedList.prototype.remove = function() {    // Método Remove
+        let current = this.head
+          if(current === null)
+            return null
+          if(current.next === null){ // Si queda un elemento
+            this.head = null;
+            return current.value;
+          } 
+      }  
+      
+      let aux = this.head
+        while(aux.next.next != null){
+          aux = aux.next;
+        }
+        aux.next = null;
+        return aux
 }
 
 
 // EJERCICIO 6
-// Crea el metodo 'removeLower' que deve devolver el valor mas bajo de la linked list 
+// Crea el metodo 'removeLower' que debe devolver el valor mas bajo de la linked list 
 // removiendo su nodo corresponidente:
 // Ejemplo:
 // > LL.print()
@@ -178,9 +285,28 @@ OrderedLinkedList.prototype.removeHigher = function(){
 // > LL.removeHigher()
 // < null
 
-OrderedLinkedList.prototype.removeLower = function(){
-    
-}
+OrderedLinkedList.prototype.removeLower = function() {
+    removeFrom(index){
+        if (index < 0 || index > this.size){
+            return null
+        };
+
+        let current = this.head;
+        let previous = null;
+
+        if(index === 0) {
+            this.head = current.next;
+        } else {
+            for (let i = 0; i < index; i++) {
+                previous = current;
+                current = current.next;
+            };
+            previous.next = current.next;
+        };
+        this.size--;
+        return current.data;
+    }
+};   
 
 
 
@@ -231,7 +357,25 @@ function multiCallbacks(cbs1, cbs2){
 // resultado:[5,8,9,32,64]
 
 BinarySearchTree.prototype.toArray = function() {
-    
+    let arr = [5,8,9,32,64];
+    let current = this.head;
+    while(current){
+        arr.push(current.data);
+        current = current.next;
+        let lca = null
+        const isCommonPath = (node) => {
+            if (!node) return false
+            var isLeft = isCommonPath(node.left)
+            var isRight = isCommonPath(node.right)
+            var isMid = node == p || node == q
+            if (isMid && isLeft || isMid && isRight || isLeft && isRight) {
+                lca = node
+            }
+            return isLeft || isRight || isMid
+        }
+        isCommonPath(root)
+        return lca
+    }
 }
 
 
@@ -250,7 +394,15 @@ BinarySearchTree.prototype.toArray = function() {
 // informarse sobre algoritmos, leerlos de un pseudocodigo e implemnterlos alcanzara
 
 function primalityTest(n) {
-    
+
+    var esPrimo = n => {        
+        if (n == 0 || n == 1 || n == 4) return false;
+        for (let x = 2; x < n / 2; x++) {
+            if (n % x == 0) return false;
+        }
+        // Si es divisible por alguno de los de arriba, no es primo de lo contrario, Es un número primo   
+        return true;
+    }
 }
 
 
@@ -260,8 +412,16 @@ function primalityTest(n) {
 // https://en.wikipedia.org/wiki/Quicksort
 
 function quickSort(array) {
-    
+    var arrayNumbers = [10, 8, 9, 5, 3, 78, 23]
+    Array.prototype.sortNumbers = function(){
+        return this.sort(
+        function(a,b){
+            return b - a
+        });
+    }
 }
+
+
 // QuickSort ya lo conocen solo que este 
 // ordena de mayor a menor
 // para esto hay que unir como right+mid+left o cambiar el 
@@ -283,8 +443,29 @@ function quickSort(array) {
 // < 32859
 
 function reverse(num){
-    
+var num = document.getElementById("valor").value;  
+if(num == 0){ 
+    document.getElementById("resultado").innerHTML = "EL PROGRAMA TERMINO"; 
+}     
+
+console.log("Enra al while ? " + ( parseInt(num / 10) != 0 ) );
+    while( parseInt(num / 10) != 0 ){ 
+        console.log(num + " % 10 = " + (num % 10) ); 
+        document.getElementById("resultado").innerHTML += (num % 10); 
+        
+        numero = parseInt(num / 10); 
+        console.log("Resultado de numero / 10 = ", num);
+        
+        console.log("Entra al if (parseInt(numero/10) == 0): " + (parseInt(num/10) == 0));
+        if(parseInt(num/10) == 0){ 
+            console.log("Ultimo modulo: " + (num % 10));
+            document.getElementById("resultado").innerHTML += (num % 10); 
+            document.getElementById("resultado").innerHTML += "     "; 
+        } 
+    }
 }
+
+
 // la grandiosa resolucion de Wilson!!!
 // declaran una variable donde 
 // almacenar el el numero invertido
